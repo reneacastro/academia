@@ -214,6 +214,20 @@ body{font-family:"Roboto",sans-serif;background:var(--bg);color:var(--txt);line-
   .app-bar{padding:0 14px}
 }
 @media(max-width:480px){.grid{grid-template-columns:1fr}.stats-grid{grid-template-columns:repeat(2,1fr)}}
+
+/* DEBUG PANEL */
+#dbg-panel{position:fixed;bottom:0;left:0;right:0;background:#1a1a2e;color:#00ff88;
+  font-family:monospace;font-size:11px;z-index:9999;max-height:40vh;display:none;border-top:2px solid #00ff88}
+#dbg-toolbar{display:flex;align-items:center;justify-content:space-between;padding:6px 12px;
+  background:#0f0f1a;border-bottom:1px solid #333}
+#dbg-toolbar span{font-weight:700;font-size:12px;color:#00ff88}
+#dbg-toolbar button{background:#00ff88;color:#000;border:none;border-radius:4px;
+  padding:4px 10px;font-size:11px;cursor:pointer;font-weight:700;margin-left:6px}
+#dbg-body{padding:8px 12px;overflow-y:auto;max-height:calc(40vh - 40px);white-space:pre-wrap;word-break:break-all}
+#dbg-toggle{position:fixed;bottom:12px;right:12px;z-index:10000;background:#1a1a2e;
+  color:#00ff88;border:1.5px solid #00ff88;border-radius:8px;padding:6px 12px;
+  font-size:11px;font-family:monospace;cursor:pointer;opacity:.7}
+#dbg-toggle:hover{opacity:1}
 </style>
 </head>
 <body>
@@ -476,7 +490,7 @@ body{font-family:"Roboto",sans-serif;background:var(--bg);color:var(--txt);line-
 </div>
 
 <script>
-const API = 'https://script.google.com/macros/s/AKfycbwOCH_-J3SHMpDGqrpB3mBMvGR-GkRpPCxLK8gAbpwiCsWEXBwebNgS7FNrjjhupPC2/exec';
+const API = 'https://script.google.com/macros/s/AKfycbz-Dt8HESvtIyCJfkMOJTEzb7lMc0cFfS7ui59Qtb2C_k-0pZ7iZawEgEBOXINjR5zY/exec';
 const SCHEDULE = {0:'rest',1:'a',2:'b',3:'rest',4:'a',5:'b',6:'c'};
 const WN = {a:'Treino A — Superior + Core',b:'Treino B — Inferior + Glúteos',c:'Treino C — Full Body + Cardio'};
 const WC = {a:'var(--blue)',b:'var(--green)',c:'var(--purple)'};
@@ -542,16 +556,49 @@ function setSyncStatus(state, msg) {
   txt.textContent = msg;
 }
 
+/* ─── DEBUG ─── */
+const _dbgLines = [];
+function dbgLog(msg) {
+  const ts = new Date().toTimeString().slice(0,8);
+  _dbgLines.unshift('[' + ts + '] ' + msg);
+  if (_dbgLines.length > 30) _dbgLines.pop();
+  const el = document.getElementById('dbg-body');
+  if (el) el.textContent = _dbgLines.join('\n');
+}
+function toggleDebug() {
+  const p = document.getElementById('dbg-panel');
+  p.style.display = p.style.display === 'none' ? 'block' : 'none';
+}
+async function testConnection() {
+  dbgLog('--- TESTE DE CONEXÃO ---');
+  dbgLog('API: ' + API.slice(0,60) + '...');
+  dbgLog('User: ' + (currentUser ? currentUser.uid.slice(0,20) : 'null'));
+  try {
+    const res = await fetch(API + '?action=getHistory&uid=TEST_DEBUG_123', {redirect:'follow'});
+    const text = await res.text();
+    dbgLog('status: ' + res.status);
+    dbgLog('body: ' + text.slice(0, 300));
+  } catch(e) {
+    dbgLog('ERRO: ' + e.message);
+  }
+}
+
 async function loadFromSheets() {
   if (!currentUser) return;
   setSyncStatus('syncing', 'Sincronizando...');
   try {
+    const uid = encodeURIComponent(currentUser.uid);
     const [hRes, wRes] = await Promise.all([
-      fetch(API + '?action=getHistory&uid=' + encodeURIComponent(currentUser.uid)),
-      fetch(API + '?action=getWorkouts&uid=' + encodeURIComponent(currentUser.uid))
+      fetch(API + '?action=getHistory&uid=' + uid, {redirect:'follow'}),
+      fetch(API + '?action=getWorkouts&uid=' + uid, {redirect:'follow'})
     ]);
-    const hData = hRes.ok ? await hRes.json() : [];
-    const wData = wRes.ok ? await wRes.json() : [];
+    const hText = await hRes.text();
+    const wText = await wRes.text();
+    dbgLog('load hStatus:' + hRes.status + ' hBody:' + hText.slice(0,100));
+    dbgLog('load wStatus:' + wRes.status + ' wBody:' + wText.slice(0,100));
+    let hData = [], wData = [];
+    try { hData = JSON.parse(hText); } catch(_) { dbgLog('hData parse error'); }
+    try { wData = JSON.parse(wText); } catch(_) { dbgLog('wData parse error'); }
     if (Array.isArray(hData)) { hist = hData; cacheHist(); }
     if (Array.isArray(wData)) { sw = wData; cacheSW(); }
     setSyncStatus('ok', 'Sincronizado com Google Sheets ✓');
@@ -568,20 +615,29 @@ async function apiPost(payload) {
   payload.uid = currentUser.uid;
   setSyncStatus('syncing', 'Salvando...');
   try {
-    // Apps Script usa doGet com parâmetros na URL
     const params = new URLSearchParams();
     Object.entries(payload).forEach(([k, v]) => {
-      params.set(k, typeof v === 'object' ? JSON.stringify(v) : v);
+      params.set(k, typeof v === 'object' ? JSON.stringify(v) : String(v));
     });
-    const res = await fetch(API + '?' + params.toString());
-    const data = await res.json();
+    const url = API + '?' + params.toString();
+    const res = await fetch(url, {redirect: 'follow'});
+    const text = await res.text();
+    let data;
+    try { data = JSON.parse(text); } catch(_) {
+      dbgLog('apiPost parse error | status:' + res.status + ' | body:' + text.slice(0,200));
+      setSyncStatus('err', 'Resposta inválida do servidor');
+      return;
+    }
     if (data && data.ok) {
       setSyncStatus('ok', 'Salvo no Google Sheets ✓');
+      dbgLog('apiPost ok: ' + payload.action);
     } else {
-      setSyncStatus('err', 'Erro ao salvar: ' + (data.error || 'resposta inválida'));
+      dbgLog('apiPost failed: ' + JSON.stringify(data));
+      setSyncStatus('err', 'Erro: ' + (data.error || JSON.stringify(data)));
     }
   } catch(e) {
-    setSyncStatus('err', 'Salvo localmente (sem internet)');
+    dbgLog('apiPost exception: ' + e.message + ' | action:' + payload.action);
+    setSyncStatus('err', 'Sem conexão — dado salvo localmente');
   }
 }
 
@@ -906,5 +962,19 @@ window.addEventListener('DOMContentLoaded', () => {
   startAnim();
 });
 </script>
+
+<!-- DEBUG PANEL -->
+<button id="dbg-toggle" onclick="toggleDebug()">🔧 DEBUG</button>
+<div id="dbg-panel">
+  <div id="dbg-toolbar">
+    <span>🔧 Debug Console</span>
+    <div>
+      <button onclick="testConnection()">Testar Conexão</button>
+      <button onclick="_dbgLines.length=0;document.getElementById('dbg-body').textContent=''">Limpar</button>
+      <button onclick="toggleDebug()">✕ Fechar</button>
+    </div>
+  </div>
+  <div id="dbg-body">Aguardando eventos...</div>
+</div>
 </body>
 </html>
