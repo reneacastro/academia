@@ -547,8 +547,8 @@ async function loadFromSheets() {
   setSyncStatus('syncing', 'Sincronizando...');
   try {
     const [hRes, wRes] = await Promise.all([
-      fetch(API + '?action=getHistory&uid=' + encodeURIComponent(currentUser.uid), {mode:'cors'}),
-      fetch(API + '?action=getWorkouts&uid=' + encodeURIComponent(currentUser.uid), {mode:'cors'})
+      fetch(API + '?action=getHistory&uid=' + encodeURIComponent(currentUser.uid)),
+      fetch(API + '?action=getWorkouts&uid=' + encodeURIComponent(currentUser.uid))
     ]);
     const hData = hRes.ok ? await hRes.json() : [];
     const wData = wRes.ok ? await wRes.json() : [];
@@ -568,13 +568,18 @@ async function apiPost(payload) {
   payload.uid = currentUser.uid;
   setSyncStatus('syncing', 'Salvando...');
   try {
-    await fetch(API, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(payload)
+    // Apps Script usa doGet com parâmetros na URL
+    const params = new URLSearchParams();
+    Object.entries(payload).forEach(([k, v]) => {
+      params.set(k, typeof v === 'object' ? JSON.stringify(v) : v);
     });
-    setSyncStatus('ok', 'Salvo no Google Sheets ✓');
+    const res = await fetch(API + '?' + params.toString());
+    const data = await res.json();
+    if (data && data.ok) {
+      setSyncStatus('ok', 'Salvo no Google Sheets ✓');
+    } else {
+      setSyncStatus('err', 'Erro ao salvar: ' + (data.error || 'resposta inválida'));
+    }
   } catch(e) {
     setSyncStatus('err', 'Salvo localmente (sem internet)');
   }
