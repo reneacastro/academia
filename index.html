@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>Academia do Renê</title>
+  <title>Academia do Rene</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;700&family=Roboto:wght@400;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -11,42 +11,45 @@
 </head>
 <body>
 
-<!-- ── HEADER ─────────────────────────────────────────────── -->
 <header>
-  <button id="back-btn" onclick="showScreen('home')" style="display:none;">
+  <button id="back-btn" onclick="showScreen('home')">
     <span class="mi">arrow_back</span>
   </button>
   <div class="brand">
-    <span class="brand-name">Academia do Renê</span>
+    <span class="brand-name">Academia do Rene</span>
     <span class="brand-sub" id="bar-sub">Hub de Treinos</span>
   </div>
   <span id="bar-user"></span>
-  <button id="btn-logout" onclick="logout()" style="display:none;">
+  <button id="btn-logout" onclick="logout()">
     <span class="mi">logout</span>
   </button>
 </header>
 
-<!-- ════════════════════════════════════════════════════════════
+<!-- ====================================================
      PERFIL / ONBOARDING
-     ════════════════════════════════════════════════════════════ -->
+     ==================================================== -->
 <div class="screen active" id="s-profile">
   <div class="container">
     <div class="profile-hero">
       <div class="profile-avatar"><span class="mi">person</span></div>
       <h2>Meu Perfil</h2>
-      <p>Preencha suas informações para personalizar o app</p>
+      <p>Preencha seus dados para personalizar o app</p>
     </div>
+
+    <!-- Perfis salvos para acesso rapido -->
+    <div id="profile-list-wrap"></div>
+    <div class="plist-divider" id="plist-divider" style="display:none;"><span>ou crie um novo perfil</span></div>
 
     <div class="card">
       <div class="card-title">Dados Pessoais</div>
       <div class="inp-row">
         <div class="inp-group">
           <label>Nome</label>
-          <input type="text" id="prf-nome" placeholder="Renê">
+          <input type="text" id="prf-nome" placeholder="Rene" autocomplete="given-name">
         </div>
         <div class="inp-group">
           <label>Sobrenome</label>
-          <input type="text" id="prf-sobrenome" placeholder="Silva">
+          <input type="text" id="prf-sobrenome" placeholder="Silva" autocomplete="family-name">
         </div>
       </div>
       <div class="inp-row">
@@ -59,26 +62,24 @@
           <input type="number" id="prf-peso" placeholder="70" min="30" max="300">
         </div>
       </div>
-
       <div class="inp-group">
         <label>Objetivo principal</label>
         <div class="goal-grid">
-          <div class="goal-opt" onclick="selectGoal(this,'emagrecimento')">
+          <div class="goal-opt" data-goal="emagrecimento" onclick="selectGoal(this,'emagrecimento')">
             <span class="goal-icon">🔥</span>Emagrecimento
           </div>
-          <div class="goal-opt" onclick="selectGoal(this,'massa')">
+          <div class="goal-opt" data-goal="massa" onclick="selectGoal(this,'massa')">
             <span class="goal-icon">💪</span>Ganho de Massa
           </div>
-          <div class="goal-opt" onclick="selectGoal(this,'qualidade')">
+          <div class="goal-opt" data-goal="qualidade" onclick="selectGoal(this,'qualidade')">
             <span class="goal-icon">🌿</span>Qualidade de Vida
           </div>
-          <div class="goal-opt" onclick="selectGoal(this,'lesao')">
-            <span class="goal-icon">🩹</span>Recuperação de Lesão
+          <div class="goal-opt" data-goal="lesao" onclick="selectGoal(this,'lesao')">
+            <span class="goal-icon">🩹</span>Recuperacao de Lesao
           </div>
         </div>
         <input type="hidden" id="prf-objetivo">
       </div>
-
       <button class="primary-btn" onclick="saveProfile()">
         <span class="mi">check_circle</span> Salvar e Entrar
       </button>
@@ -86,9 +87,9 @@
   </div>
 </div>
 
-<!-- ════════════════════════════════════════════════════════════
+<!-- ====================================================
      HOME
-     ════════════════════════════════════════════════════════════ -->
+     ==================================================== -->
 <div class="screen" id="s-home">
   <div class="container">
     <div class="sync-bar">
@@ -99,36 +100,35 @@
     <div class="welcome-strip">
       <span class="mi">fitness_center</span>
       <div class="welcome-text">
-        <h2 id="h-greeting">Bom dia! 👋</h2>
+        <h2 id="h-greeting">Bem-vindo!</h2>
         <p id="h-sub">Pronto para treinar?</p>
       </div>
     </div>
 
-    <!-- badges do dia (inline, sem position:absolute) -->
-    <div id="badge-a" style="display:none;background:var(--blue);color:#fff;font-size:11px;font-weight:700;padding:3px 12px;border-radius:20px;display:inline-block;margin-bottom:8px;">Hoje: Superior</div>
-    <div id="badge-b" style="display:none;background:var(--green);color:#fff;font-size:11px;font-weight:700;padding:3px 12px;border-radius:20px;display:inline-block;margin-bottom:8px;">Hoje: Inferior</div>
-    <div id="badge-c" style="display:none;background:var(--purple);color:#fff;font-size:11px;font-weight:700;padding:3px 12px;border-radius:20px;display:inline-block;margin-bottom:8px;">Hoje: Full Body</div>
-    <div id="badge-l" style="display:none;background:var(--orange);color:#fff;font-size:11px;font-weight:700;padding:3px 12px;border-radius:20px;display:inline-block;margin-bottom:8px;">Hoje: Treino Livre</div>
+    <div id="badge-a" style="display:none;background:var(--blue);color:#fff;font-size:11px;font-weight:700;padding:3px 12px;border-radius:20px;margin-bottom:8px;">Hoje: Superior</div>
+    <div id="badge-b" style="display:none;background:var(--green);color:#fff;font-size:11px;font-weight:700;padding:3px 12px;border-radius:20px;margin-bottom:8px;">Hoje: Inferior</div>
+    <div id="badge-c" style="display:none;background:var(--purple);color:#fff;font-size:11px;font-weight:700;padding:3px 12px;border-radius:20px;margin-bottom:8px;">Hoje: Full Body</div>
+    <div id="badge-l" style="display:none;background:var(--orange);color:#fff;font-size:11px;font-weight:700;padding:3px 12px;border-radius:20px;margin-bottom:8px;">Hoje: Treino Livre</div>
 
-    <div class="sec-hdr"><span class="mi">directions_run</span> Seus Treinos</div>
+    <div class="sec-divider">Seus Treinos</div>
     <div id="home-sw-grid"></div>
 
-    <div class="sec-hdr" style="margin-top:20px;"><span class="mi">grid_view</span> Funções</div>
+    <div class="sec-divider" style="margin-top:20px;">Funcoes</div>
     <div class="menu-grid">
       <button class="menu-card" onclick="showScreen('bank')">
         <div class="mc-icon" style="background:var(--blue);"><span class="mi">library_add</span></div>
-        <div class="mc-name">Banco de Exercícios</div>
+        <div class="mc-name">Banco de Exercicios</div>
         <div class="mc-sub">Criar e gerenciar treinos</div>
       </button>
       <button class="menu-card" onclick="showScreen('calendar')">
         <div class="mc-icon" style="background:var(--green);"><span class="mi">event_note</span></div>
         <div class="mc-name">Registrar Treino</div>
-        <div class="mc-sub">Histórico e calorias</div>
+        <div class="mc-sub">Historico e calorias</div>
       </button>
       <button class="menu-card" onclick="showScreen('dashboard')">
         <div class="mc-icon" style="background:var(--purple);"><span class="mi">bar_chart</span></div>
         <div class="mc-name">Dashboard</div>
-        <div class="mc-sub">Estatísticas e progresso</div>
+        <div class="mc-sub">Estatisticas e progresso</div>
       </button>
       <button class="menu-card" onclick="openProfile()">
         <div class="mc-icon" style="background:var(--sub);"><span class="mi">manage_accounts</span></div>
@@ -137,9 +137,10 @@
       </button>
     </div>
 
-    <!-- Grade semanal -->
     <div class="sched-card">
-      <div class="sched-card-title"><span class="mi">calendar_view_week</span> Grade Semanal</div>
+      <div class="sched-card-title">
+        <span class="mi">calendar_view_week</span> Grade Semanal
+      </div>
       <div id="sched-edit-wrap"></div>
       <button class="primary-btn" onclick="saveSched()">
         <span class="mi">save</span> Salvar Grade
@@ -148,9 +149,9 @@
   </div>
 </div>
 
-<!-- ════════════════════════════════════════════════════════════
+<!-- ====================================================
      WORKOUT
-     ════════════════════════════════════════════════════════════ -->
+     ==================================================== -->
 <div class="screen" id="s-workout">
   <div class="container">
     <div class="w-header">
@@ -160,21 +161,21 @@
     </div>
     <div class="prog-wrap">
       <div class="prog-bar"><div class="prog-fill" style="width:0%"></div></div>
-      <span id="prog-txt">0 / 0 exercícios concluídos</span>
+      <span id="prog-txt">0 / 0 exercicios concluidos</span>
     </div>
     <div class="ex-grid"></div>
   </div>
 </div>
 
-<!-- ════════════════════════════════════════════════════════════
+<!-- ====================================================
      CONGRATS
-     ════════════════════════════════════════════════════════════ -->
+     ==================================================== -->
 <div class="screen" id="s-congrats">
   <div class="container">
     <div class="congrats-wrap">
       <div class="congrats-emoji">🎉</div>
-      <div class="congrats-title">Treino Concluído!</div>
-      <div class="congrats-sub" id="congrats-workout-name">Parabéns pelo esforço!</div>
+      <div class="congrats-title">Treino Concluido!</div>
+      <div class="congrats-sub" id="congrats-workout-name">Parabens pelo esforco!</div>
     </div>
     <div class="cg-box">
       <h3>Registrar treino</h3>
@@ -183,15 +184,15 @@
         <input type="number" id="congrats-cal-inp" placeholder="ex: 350" min="0">
       </div>
       <button class="primary-btn" onclick="saveCongrats()">
-        <span class="mi">check_circle</span> Salvar e voltar ao início
+        <span class="mi">check_circle</span> Salvar e voltar ao inicio
       </button>
     </div>
   </div>
 </div>
 
-<!-- ════════════════════════════════════════════════════════════
-     CALENDAR / HISTÓRICO
-     ════════════════════════════════════════════════════════════ -->
+<!-- ====================================================
+     CALENDAR / HISTORICO
+     ==================================================== -->
 <div class="screen" id="s-calendar">
   <div class="container">
     <div class="cal-card">
@@ -208,9 +209,8 @@
         <span class="mi">save</span> Salvar Registro
       </button>
     </div>
-
     <div class="card">
-      <div class="card-title">Histórico de Treinos</div>
+      <div class="card-title">Historico de Treinos</div>
       <div class="hist-list" id="hist-list">
         <div class="empty"><span class="mi">history</span>Nenhum treino registrado</div>
       </div>
@@ -218,9 +218,9 @@
   </div>
 </div>
 
-<!-- ════════════════════════════════════════════════════════════
+<!-- ====================================================
      DASHBOARD
-     ════════════════════════════════════════════════════════════ -->
+     ==================================================== -->
 <div class="screen" id="s-dashboard">
   <div class="container">
     <div class="period-row">
@@ -232,15 +232,15 @@
     </div>
     <div class="custom-wrap">
       <input type="date" id="dash-start">
-      <span>até</span>
+      <span>ate</span>
       <input type="date" id="dash-end">
       <button onclick="setCustomPeriod()">Aplicar</button>
     </div>
     <div class="stats-grid">
-      <div class="stat-card"><div class="stat-val" id="stat-days">—</div><div class="stat-lbl">Treinos</div></div>
-      <div class="stat-card"><div class="stat-val" id="stat-cal">—</div><div class="stat-lbl">Kcal total</div></div>
-      <div class="stat-card"><div class="stat-val" id="stat-avg">—</div><div class="stat-lbl">Kcal média</div></div>
-      <div class="stat-card"><div class="stat-val" id="stat-best" style="font-size:14px;">—</div><div class="stat-lbl">Mais frequente</div></div>
+      <div class="stat-card"><div class="stat-val" id="stat-days">--</div><div class="stat-lbl">Treinos</div></div>
+      <div class="stat-card"><div class="stat-val" id="stat-cal">--</div><div class="stat-lbl">Kcal total</div></div>
+      <div class="stat-card"><div class="stat-val" id="stat-avg">--</div><div class="stat-lbl">Kcal media</div></div>
+      <div class="stat-card"><div class="stat-val" id="stat-best" style="font-size:14px;">--</div><div class="stat-lbl">Mais frequente</div></div>
     </div>
     <div class="chart-wrap">
       <div class="chart-title">Treinos por semana</div>
@@ -253,9 +253,9 @@
   </div>
 </div>
 
-<!-- ════════════════════════════════════════════════════════════
+<!-- ====================================================
      BANK
-     ════════════════════════════════════════════════════════════ -->
+     ==================================================== -->
 <div class="screen" id="s-bank">
   <div class="container">
     <div class="tabs">
@@ -264,7 +264,6 @@
       <button class="tab-btn"    id="tabbtn-c" onclick="switchBankTab('c')">🔥 Full Body</button>
       <button class="tab-btn"    id="tabbtn-l" onclick="switchBankTab('l')">🏃 Livre</button>
     </div>
-
     <div id="bank-create-section" style="display:none;" class="card">
       <div class="card-title">Criar / Editar Treino</div>
       <input type="text" class="cw-name-inp" id="cw-name-inp" placeholder="Nome do treino...">
@@ -273,15 +272,12 @@
         <span class="mi">save</span> Salvar Treino
       </button>
     </div>
-
     <button class="primary-btn" style="margin-bottom:16px;" onclick="openCreateWorkout()">
       <span class="mi">add</span> Criar Novo Treino
     </button>
-
-    <div class="sec-hdr"><span class="mi">list</span> Meus Treinos</div>
+    <div class="sec-divider">Meus Treinos</div>
     <div id="sw-list"></div>
-
-    <div class="sec-hdr"><span class="mi">fitness_center</span> Exercícios</div>
+    <div class="sec-divider" style="margin-top:20px;">Exercicios</div>
     <div class="tab-panel on" id="tab-a"></div>
     <div class="tab-panel"    id="tab-b"></div>
     <div class="tab-panel"    id="tab-c"></div>
@@ -289,12 +285,12 @@
   </div>
 </div>
 
-<!-- ── MODAL VER TREINO ─────────────────────────────────────── -->
+<!-- MODAL VER TREINO -->
 <div id="view-workout-modal">
   <div class="vwm-inner">
     <div class="vwm-header">
       <div class="card-title vwm-title" style="margin:0;">Treino</div>
-      <button class="vwm-close" onclick="closeViewWorkout()">✕</button>
+      <button class="vwm-close" onclick="closeViewWorkout()">x</button>
     </div>
     <div id="vwm-body"></div>
   </div>
@@ -302,18 +298,5 @@
 
 <script src="data.js"></script>
 <script src="app.js"></script>
-
-<script>
-// Seleção de objetivo no perfil
-function selectGoal(el, val) {
-  document.querySelectorAll('.goal-opt').forEach(function(o){ o.classList.remove('selected'); });
-  el.classList.add('selected');
-  document.getElementById('prf-objetivo').value = val;
-}
-// Pré-seleciona objetivo se já salvo
-document.addEventListener('DOMContentLoaded', function(){
-  // feito após checkStoredLogin() via openProfileFields()
-});
-</script>
 </body>
 </html>
