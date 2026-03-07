@@ -37,8 +37,12 @@ var currentUser = null;
 
 function checkStoredLogin() {
   var u = localStorage.getItem('rene_user');
-  if (u) { currentUser = JSON.parse(u); afterLogin(); }
-  else showLogin();
+  if (u) { currentUser = JSON.parse(u); }
+  else {
+    currentUser = { uid: 'rene_default', email: 'rene@local', name: 'Renê' };
+    localStorage.setItem('rene_user', JSON.stringify(currentUser));
+  }
+  afterLogin();
 }
 function signInWithGoogle() {
   // Login simplificado: sem OAuth, usa nome local
@@ -58,11 +62,8 @@ function autoLogin() {
   afterLogin();
 }
 function logout() {
-  localStorage.removeItem('rene_user');
-  currentUser = null; hist = []; sw = [];
-  document.getElementById('bar-user').style.display = 'none';
-  document.getElementById('btn-logout').style.display = 'none';
-  showLogin();
+  localStorage.clear();
+  location.reload();
 }
 function afterLogin() {
   var el = document.getElementById('bar-user');
@@ -75,9 +76,8 @@ function afterLogin() {
   loadFromSheets();
 }
 function showLogin() {
-  document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
-  document.getElementById('s-login').classList.add('active');
-  document.getElementById('back-btn').style.display = 'none';
+  // Login desativado — entra direto
+  checkStoredLogin();
 }
 
 /* ── SYNC ── */
