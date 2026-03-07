@@ -57,11 +57,14 @@ header {
 
 /* ── LOGIN ── */
 .login-wrap {
-  min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px;
+  min-height: calc(100vh - 56px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px; background: var(--bg);
 }
 .login-card {
   background: var(--surface); border-radius: 24px; padding: 40px 32px;
-  text-align: center; box-shadow: var(--sh2); max-width: 380px; width: 100%;
+  text-align: center; box-shadow: var(--sh2);
+  max-width: 380px; width: 100%;
 }
 .login-logo { font-size: 56px; margin-bottom: 16px; }
 .login-title { font-family: 'Google Sans', sans-serif; font-size: 24px; font-weight: 700; margin-bottom: 8px; }
@@ -465,3 +468,76 @@ header {
 
 /* ── section header ── */
 .sec-hdr { margin: 24px 0 12px; font-size: 12px; }
+
+/* ════ RESPONSIVIDADE GLOBAL ════ */
+html { -webkit-text-size-adjust: 100%; }
+
+/* Container nunca ultrapassa 600px e tem padding lateral */
+.container {
+  max-width: 600px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding-left: 16px !important;
+  padding-right: 16px !important;
+  padding-bottom: 80px !important;
+  width: 100%;
+}
+
+/* Header fixo responsivo */
+header {
+  max-width: 100%;
+  padding-left: max(16px, env(safe-area-inset-left));
+  padding-right: max(16px, env(safe-area-inset-right));
+}
+
+/* Telas nunca ultrapassam viewport */
+.screen { width: 100%; overflow-x: hidden; }
+
+/* Menu grid: 2 colunas sempre, nunca mais */
+.menu-grid, #home-sw-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 10px;
+}
+
+/* Workout: imagens responsivas */
+.img-wrap { width: 100%; max-height: 220px; }
+.img-wrap img { max-width: 100%; }
+
+/* Grade semanal: scroll horizontal em telas pequenas */
+#sched-edit-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 4px;
+}
+
+/* Banco de exercícios: tabs com scroll */
+.tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 2px; }
+
+/* sw-item e bank-card: nunca overflow */
+.sw-item, .bank-card { overflow: hidden; }
+
+/* Dashboard: gráficos responsivos */
+.chart-box canvas { max-width: 100%; }
+
+/* Mobile: ajustes finos */
+@media (max-width: 480px) {
+  .menu-card { padding: 14px 12px; }
+  .mc-name   { font-size: 13px; }
+  .mc-sub    { font-size: 11px; }
+  .sched-sel { font-size: 9px; padding: 3px 1px; }
+  .dn        { font-size: 9px; }
+  .stat-val  { font-size: 22px; }
+  .w-title   { font-size: 18px; }
+  .chart-row { grid-template-columns: 1fr; }
+  .sw-actions { gap: 4px; }
+  .sw-btn    { font-size: 11px; padding: 5px 8px; }
+  header .brand-name { font-size: 15px; }
+  .welcome-strip { flex-direction: column; gap: 8px; }
+  .welcome-strip .mi { font-size: 28px !important; }
+}
+
+@media (max-width: 360px) {
+  .menu-grid, #home-sw-grid { gap: 8px; }
+  .container { padding-left: 12px !important; padding-right: 12px !important; }
+}

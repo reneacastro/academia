@@ -41,9 +41,19 @@ function checkStoredLogin() {
   else showLogin();
 }
 function signInWithGoogle() {
-  var email = prompt('Digite seu e-mail Google para entrar:');
-  if (!email || !email.includes('@')) { alert('E-mail inválido.'); return; }
-  currentUser = { uid: btoa(email).replace(/=/g,''), email: email, name: email.split('@')[0] };
+  // Login simplificado: sem OAuth, usa nome local
+  var name = prompt('Qual é o seu nome?', 'Renê');
+  if (!name) name = 'Renê';
+  var uid = btoa(name.toLowerCase().trim()).replace(/[^a-z0-9]/gi,'');
+  currentUser = { uid: uid, email: name.toLowerCase().replace(/\s+/g,'')+'@local', name: name };
+  localStorage.setItem('rene_user', JSON.stringify(currentUser));
+  afterLogin();
+}
+function autoLogin() {
+  // Chamado quando não há sessão — cria sessão automática
+  var u = localStorage.getItem('rene_user');
+  if (u) { currentUser = JSON.parse(u); afterLogin(); return; }
+  currentUser = { uid: 'rene_default', email: 'rene@local', name: 'Renê' };
   localStorage.setItem('rene_user', JSON.stringify(currentUser));
   afterLogin();
 }
