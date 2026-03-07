@@ -196,6 +196,7 @@ function initHome() {
   var cc = document.getElementById('cw-card');
   if (cc) { cc.style.display = 'none'; } // oculta card antigo single
   renderHomeSavedWorkouts();
+  } catch(e) { console.error('initHome', e); }
 }
 
 
