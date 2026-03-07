@@ -139,8 +139,10 @@ header {
 #sched-edit-wrap { display: grid; grid-template-columns: repeat(7,1fr); gap: 6px; margin-bottom: 12px; }
 .sched-sel {
   border: 1.5px solid var(--border); border-radius: 8px;
-  padding: 5px 2px; font-size: 11px; font-weight: 600;
-  cursor: pointer; width: 100%; outline: none; text-align: center;
+  padding: 4px 2px; font-size: 10px; font-weight: 600;
+  cursor: pointer; width: 100%; outline: none;
+  text-align: center; appearance: none; -webkit-appearance: none;
+  background-image: none;
 }
 
 /* ── CARD ── */
@@ -371,3 +373,95 @@ header {
   .sw-actions  { gap: 4px; }
   .sw-btn      { font-size: 11px; padding: 6px 9px; }
 }
+
+/* ── BANK FIXES ── */
+.bank-hdr { margin-bottom: 16px; }
+.bank-card {
+  background: var(--surface); border-radius: 12px;
+  padding: 14px 16px; box-shadow: var(--sh1); margin-bottom: 8px;
+  display: flex; align-items: flex-start; gap: 12px; flex-wrap: nowrap;
+}
+.bank-info { flex: 1; min-width: 0; }
+.bank-name { font-weight: 700; font-size: 14px; white-space: normal; word-break: break-word; }
+.bank-btn  {
+  flex-shrink: 0; padding: 8px 12px; border-radius: 8px;
+  border: 1.5px solid var(--blue); background: var(--surface);
+  color: var(--blue); font-size: 12px; font-weight: 600;
+  cursor: pointer; display: flex; align-items: center; gap: 4px;
+  white-space: nowrap;
+}
+/* Tabs do banco: mostrar scroll horizontal sem barra */
+.tabs { scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+
+/* ── HOME: grid treinos salvos ── */
+#home-sw-grid {
+  display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; margin-bottom: 6px;
+}
+
+/* ── CAL card ── */
+.cal-card {
+  background: var(--surface); border-radius: var(--r);
+  padding: 20px; box-shadow: var(--sh1); margin-bottom: 12px;
+}
+.cal-card h3 {
+  font-family: 'Google Sans', sans-serif; font-size: 16px;
+  font-weight: 700; margin-bottom: 16px;
+  display: flex; align-items: center; gap: 6px;
+}
+.inp-group { margin-bottom: 14px; }
+.inp-group label { font-size: 13px; font-weight: 600; color: var(--sub); display: block; margin-bottom: 6px; }
+.inp-group input {
+  width: 100%; padding: 12px 16px; border-radius: 12px;
+  border: 2px solid var(--border); font-size: 15px; outline: none;
+}
+.inp-group input:focus { border-color: var(--blue); }
+
+/* ── Congrats box ── */
+.cg-box {
+  background: var(--surface); border-radius: var(--r);
+  padding: 20px; box-shadow: var(--sh1); margin: 0 0 20px; text-align: left;
+}
+.cg-box h3 { font-size: 15px; font-weight: 700; margin-bottom: 12px; }
+
+/* ── Sched card ── */
+.sched-card {
+  background: var(--surface); border-radius: var(--r);
+  padding: 20px; box-shadow: var(--sh1); margin-top: 20px;
+}
+.sched-card-title {
+  font-family: 'Google Sans', sans-serif; font-size: 15px; font-weight: 700;
+  margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+}
+
+/* ── sw-item responsivo ── */
+.sw-item { flex-wrap: wrap; }
+.sw-actions { flex-wrap: wrap; margin-top: 4px; }
+
+/* ── Dashboard custom-wrap ── */
+.custom-wrap { flex-wrap: wrap; }
+.custom-wrap input { min-width: 130px; }
+
+/* ── hist-item fix ── */
+.hist-item { flex-wrap: wrap; }
+.hist-name { font-size: 14px; }
+
+/* ── Modal fix ── */
+#view-workout-modal {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,.55); z-index: 9000;
+  align-items: center; justify-content: center; padding: 16px;
+}
+#view-workout-modal.open { display: flex; }
+
+/* ── Sync bar ── */
+.sync-bar { padding: 6px 0; }
+
+/* ── welcome strip text fix ── */
+.welcome-text p { font-size: 14px; line-height: 1.5; }
+
+/* ── primary-btn fix ── */
+.primary-btn { transition: background .15s; border-radius: 12px; }
+
+/* ── section header ── */
+.sec-hdr { margin: 24px 0 12px; font-size: 12px; }

@@ -60,6 +60,7 @@ function afterLogin() {
   document.getElementById('btn-logout').style.display = 'flex';
   initDefaultWorkouts();
   renderSchedUI();
+  renderHomeSavedWorkouts();
   showScreen('home');
   loadFromSheets();
 }
@@ -82,7 +83,19 @@ async function apiPost(payload) {
   payload.uid = currentUser.uid;
   setSyncStatus('syncing', 'Salvando...');
   try {
-    await fetch(API, { method:'POST', redirect:'follow', body: JSON.stringify(payload) });
+    const postBody = JSON.stringify(payload);
+    // Tenta fetch normal; Apps Script redireciona para URL de execução
+    try {
+      await fetch(API, {
+        method: 'POST',
+        redirect: 'follow',
+        headers: { 'Content-Type': 'text/plain' },
+        body: postBody
+      });
+    } catch(_) {
+      // fallback no-cors (não lê resposta mas o Apps Script recebe)
+      await fetch(API, { method:'POST', mode:'no-cors', body: postBody });
+    }
     setSyncStatus('ok', 'Salvo ✓');
   } catch(e) {
     setSyncStatus('err', 'Salvo localmente');
@@ -94,9 +107,9 @@ async function loadFromSheets() {
   try {
     var uid = encodeURIComponent(currentUser.uid);
     var [hRes, wRes, sRes] = await Promise.all([
-      fetch(API + '?action=getHistory&uid=' + uid, { redirect:'follow' }),
-      fetch(API + '?action=getWorkouts&uid=' + uid, { redirect:'follow' }),
-      fetch(API + '?action=getSchedule&uid=' + uid, { redirect:'follow' })
+      fetch(API + '?action=getHistory&uid='  + uid),
+      fetch(API + '?action=getWorkouts&uid=' + uid),
+      fetch(API + '?action=getSchedule&uid=' + uid)
     ]);
     var hData = [], wData = [], sData = null;
     try { hData = JSON.parse(await hRes.text()); } catch(_) {}
@@ -114,7 +127,7 @@ async function loadFromSheets() {
     }
     setSyncStatus('ok', 'Sincronizado ✓');
     initDefaultWorkouts();
-    initHome(); renderSchedUI(); renderHist(); renderCalWorkouts();
+    initHome(); renderSchedUI(); renderHomeSavedWorkouts(); renderHist(); renderCalWorkouts();
     if (document.getElementById('s-dashboard').classList.contains('active')) renderDash();
     if (document.getElementById('s-bank').classList.contains('active')) renderSW();
   } catch(e) {
@@ -160,40 +173,70 @@ function initHome() {
   if (td) subEl.textContent = 'Treino de hoje: ' + td.name + ' ✅';
   else if (t === 'rest') subEl.textContent = 'Dia de descanso hoje 😌';
   else subEl.textContent = 'Sugerido hoje: ' + (WN[t] || t);
-  /* card último treino salvo */
+  /* cards treinos salvos */
   var cc = document.getElementById('cw-card');
-  if (cc) {
-    if (sw.length) {
-      cc.style.display = 'flex';
-      document.getElementById('cw-name').textContent = sw[sw.length-1].name;
-    } else {
-      cc.style.display = 'none';
-    }
-  }
+  if (cc) { cc.style.display = 'none'; } // oculta card antigo single
+  renderHomeSavedWorkouts();
+}
+
+
+/* ── HOME: TREINOS SALVOS ── */
+function renderHomeSavedWorkouts() {
+  var grid = document.getElementById('home-sw-grid'); if (!grid) return;
+  if (!sw.length) { grid.innerHTML = ''; return; }
+  var catColors = { a:'var(--blue)', b:'var(--green)', c:'var(--purple)', l:'var(--orange)' };
+  var catBg     = { a:'#e8f0fe',    b:'#e6f4ea',      c:'#f3e5f5',      l:'#fff3e0'       };
+  var catIcon   = { a:'💪', b:'🦵', c:'🔥', l:'🏃' };
+  grid.innerHTML = sw.map(function(w){
+    var cat = w.category || 'l';
+    var col = catColors[cat] || 'var(--blue)';
+    var bg  = catBg[cat]     || '#e8f0fe';
+    var ico = catIcon[cat]   || '⭐';
+    return '<div class="menu-card" onclick="startSavedWorkout(''+w.id+'')">'
+      + '<div class="mc-icon" style="background:'+col+'">'
+      + '<span style="font-size:20px">'+ico+'</span></div>'
+      + '<div class="mc-name">'+w.name+'</div>'
+      + '<div class="mc-sub">'+(w.exercises||[]).length+' exercícios</div>'
+      + '</div>';
+  }).join('');
 }
 
 /* ── GRADE SEMANAL (editável) ── */
 var DAY_NAMES = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 function renderSchedUI() {
   var wrap = document.getElementById('sched-edit-wrap'); if (!wrap) return;
-  var catColors = { a:'var(--blue)', b:'var(--green)', c:'var(--purple)', l:'var(--orange)', rest:'var(--sub)' };
-  var catBg     = { a:'#e8f0fe', b:'#e6f4ea', c:'#f3e5f5', l:'#fff3e0', rest:'#f8f9fa' };
-  var opts = { a:'A', b:'B', c:'C', l:'L', rest:'Desc' };
+  // Montar opções: Descanso + Leve + cada treino salvo
+  var catColors = { rest:'var(--sub)', l:'var(--orange)' };
+  var catBg     = { rest:'#f8f9fa',    l:'#fff3e0' };
+  // Adicionar cores dos treinos salvos
+  var wColors = ['var(--blue)','var(--green)','var(--purple)','var(--orange)','#e91e63','#607d8b'];
+  var wBgs    = ['#e8f0fe','#e6f4ea','#f3e5f5','#fff3e0','#fce4ec','#f8f9fa'];
+  sw.forEach(function(w, i){
+    catColors[String(w.id)] = wColors[i % wColors.length];
+    catBg[String(w.id)]     = wBgs[i % wBgs.length];
+  });
+
   wrap.innerHTML = DAY_NAMES.map(function(dn, idx){
-    var cur = SCHEDULE[idx] || 'rest';
-    var selects = Object.keys(opts).map(function(v){
-      return '<option value="'+v+'"'+(cur===v?' selected':'')+'>'+opts[v]+'</option>';
-    }).join('');
+    var cur = String(SCHEDULE[idx] || 'rest');
+    var col = catColors[cur] || 'var(--blue)';
+    var bg  = catBg[cur]     || '#e8f0fe';
+    var opts = '<option value="rest"'+(cur==='rest'?' selected':'')+'>Desc</option>'
+             + '<option value="l"'+(cur==='l'?' selected':'')+'>🏃 Livre</option>';
+    sw.forEach(function(w){
+      var wid = String(w.id);
+      var short = w.name.length > 10 ? w.name.slice(0,10)+'…' : w.name;
+      opts += '<option value="'+wid+'"'+(cur===wid?' selected':'')+'>'+short+'</option>';
+    });
     return '<div class="sched-edit-day">'
       + '<div class="dn">'+dn+'</div>'
       + '<select class="sched-sel" onchange="setSchedDay('+idx+',this.value)"'
-      + ' style="color:'+catColors[cur]+';background:'+catBg[cur]+'">'
-      + selects + '</select></div>';
+      + ' style="color:'+col+';background:'+bg+'">'
+      + opts + '</select></div>';
   }).join('');
 }
 function setSchedDay(day, val) {
   SCHEDULE[day] = val;
-  renderSchedUI();
+  renderSchedUI();  // re-renderiza para atualizar cores
 }
 function saveSchedEdit() {
   localStorage.setItem('rene_schedule', JSON.stringify(SCHEDULE));
@@ -527,7 +570,7 @@ async function saveCustomWorkout() {
   document.querySelectorAll('.bank-btn').forEach(function(b){
     b.innerHTML='<span class="mi">add_circle_outline</span> Adicionar'; b.style.opacity='1';
   });
-  renderSW(); renderCalWorkouts(); initHome();
+  renderSW(); renderCalWorkouts(); initHome(); renderHomeSavedWorkouts(); renderSchedUI();
   showScreen('home');
 }
 function renderSW() {
@@ -599,9 +642,9 @@ function viewWorkout(id) {
       + '<div style="font-size:11px;color:'+c+';margin-top:2px">'+ex.muscles.join(', ')+'</div></div></div>';
   }).join('') || '<div class="empty">Sem exercícios</div>';
   document.getElementById('vwm-start-btn').onclick = function(){ closeViewModal(); startSavedWorkout(id); };
-  document.getElementById('view-workout-modal').style.display = 'flex';
+  document.getElementById('view-workout-modal').classList.add('open');
 }
-function closeViewModal() { document.getElementById('view-workout-modal').style.display = 'none'; }
+function closeViewModal() { document.getElementById('view-workout-modal').classList.remove('open'); }
 
 /* ── IMAGENS ── */
 function tryFb(eid, f0, f1) {
