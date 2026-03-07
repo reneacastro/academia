@@ -321,8 +321,8 @@ function startSavedWorkout(id) {
     var ex = EX[eid]; if (!ex) return;
     var imgA = '<div id="fb-'+eid+'" class="img-fb" style="display:flex"><span class="mi">fitness_center</span><span>'+ex.name+'</span></div>';
     if (ex.p) {
-      imgA = '<img id="img-'+eid+'-0" src="'+GH+ex.p+'_0.jpg" onerror="tryFb(\''+eid+'\',\''+GH+ex.f+'_0.jpg\',\''+GH+ex.f+'_1.jpg\')">'
-           + '<img id="img-'+eid+'-1" src="'+GH+ex.p+'_1.jpg" class="img-b">'
+      imgA = '<img id="img-'+eid+'-0" src="'+GH+'/'+ex.p+'/0.jpg" onerror="tryFb(\''+eid+'\',\''+GH+'/'+ex.f+'/0.jpg\',\''+GH+'/'+ex.f+'/1.jpg\')">'
+           + '<img id="img-'+eid+'-1" src="'+GH+'/'+ex.p+'/1.jpg" class="img-b">'
            + '<div id="fb-'+eid+'" class="img-fb"><span class="mi">fitness_center</span><span>'+ex.name+'</span></div>';
     }
     var mp = (ex.muscles||[]).map(function(m){ return '<span class="mpill">'+m+'</span>'; }).join('');
