@@ -66,18 +66,25 @@ function logout() {
   location.reload();
 }
 function afterLogin() {
-  var el = document.getElementById('bar-user');
-  if (el) { el.textContent = currentUser.name || currentUser.email.split('@')[0]; el.style.display = 'block'; }
-  document.getElementById('btn-logout').style.display = 'flex';
-  initDefaultWorkouts();
-  renderSchedUI();
-  renderHomeSavedWorkouts();
-  showScreen('home');
-  loadFromSheets();
+  try {
+    var el = document.getElementById('bar-user');
+    if (el) { el.textContent = currentUser.name || currentUser.email.split('@')[0]; el.style.display = 'block'; }
+    var lo = document.getElementById('btn-logout');
+    if (lo) lo.style.display = 'flex';
+    initDefaultWorkouts();
+    showScreen('home');
+    renderSchedUI();
+    renderHomeSavedWorkouts();
+    initHome();
+    loadFromSheets();
+  } catch(e) {
+    console.error('afterLogin error:', e);
+    showScreen('home');
+  }
 }
 function showLogin() {
-  // Login desativado — entra direto
-  checkStoredLogin();
+  // Sem tela de login — vai direto pra home
+  showScreen('home');
 }
 
 /* ── SYNC ── */
@@ -114,6 +121,7 @@ async function apiPost(payload) {
 async function loadFromSheets() {
   if (!currentUser) return;
   setSyncStatus('syncing', 'Sincronizando...');
+  var syncTimeout = setTimeout(function(){ setSyncStatus('err', 'Sem conexão — dados locais'); }, 8000);
   try {
     var uid = encodeURIComponent(currentUser.uid);
     var [hRes, wRes, sRes] = await Promise.all([
@@ -135,13 +143,13 @@ async function loadFromSheets() {
       SCHEDULE = sData;
       localStorage.setItem('rene_schedule', JSON.stringify(sData));
     }
-    setSyncStatus('ok', 'Sincronizado ✓');
+    clearTimeout(syncTimeout); setSyncStatus('ok', 'Sincronizado ✓');
     initDefaultWorkouts();
     initHome(); renderSchedUI(); renderHomeSavedWorkouts(); renderHist(); renderCalWorkouts();
     if (document.getElementById('s-dashboard').classList.contains('active')) renderDash();
     if (document.getElementById('s-bank').classList.contains('active')) renderSW();
   } catch(e) {
-    setSyncStatus('err', 'Offline — dados locais');
+    clearTimeout(syncTimeout); setSyncStatus('err', 'Offline — dados locais');
   }
 }
 
@@ -160,7 +168,7 @@ function showScreen(id) {
     congrats:  'Treino concluído!'
   };
   document.getElementById('bar-sub').textContent = labels[id] || '';
-  if (id === 'dashboard') { renderDash(); }
+  if (id === 'dashboard') { initDashDates(); renderDash(); }
   if (id === 'calendar')  { renderHist(); initCal(); renderCalWorkouts(); }
   if (id === 'bank')      { renderSW(); }
   window.scrollTo(0, 0);
@@ -168,6 +176,7 @@ function showScreen(id) {
 
 /* ── HOME ── */
 function initHome() {
+  try {
   var h = new Date().getHours();
   var g = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
   var name = currentUser ? (currentUser.name || currentUser.email.split('@')[0]) : 'Renê';
@@ -688,10 +697,15 @@ function startAnim() {
 
 /* ── INIT ── */
 window.addEventListener('DOMContentLoaded', function(){
-  checkStoredLogin();
-  var td = todayStr();
-  var wd = new Date(); wd.setDate(wd.getDate()-7);
-  document.getElementById('dt').value = td;
-  document.getElementById('df').value = wd.toISOString().split('T')[0];
+  try { checkStoredLogin(); } catch(e) { console.error('init error:', e); }
   startAnim();
 });
+
+function initDashDates() {
+  var td = todayStr();
+  var wd = new Date(); wd.setDate(wd.getDate()-7);
+  var dtEl = document.getElementById('dt');
+  var dfEl = document.getElementById('df');
+  if (dtEl) dtEl.value = td;
+  if (dfEl) dfEl.value = wd.toISOString().split('T')[0];
+}
