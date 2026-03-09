@@ -195,7 +195,7 @@ header {
 .img-wrap {
   position: relative;
   width: 100%;
-  aspect-ratio: 1 / 1;
+  height: 160px;
   background: #ffffff;
   overflow: hidden;
 }
@@ -205,6 +205,7 @@ header {
   object-fit: contain;
   background: #ffffff;
 }
+
 .img-fb {
   position: absolute; inset: 0;
   display: none;
@@ -382,3 +383,13 @@ header {
   .goal-grid { grid-template-columns: 1fr 1fr; }
   .avatar-grid { grid-template-columns: repeat(5,1fr); }
 }
+/* ── PROFILE QUICK ── */
+.profile-quick {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  background: var(--bg); border-radius: 12px; padding: 12px 16px;
+  cursor: pointer; border: 2px solid var(--border); min-width: 80px;
+  transition: border-color .15s, box-shadow .15s;
+}
+.profile-quick:hover { border-color: var(--blue); box-shadow: var(--sh2); }
+.pq-avatar { font-size: 32px; line-height: 1; }
+.pq-name   { font-size: 12px; font-weight: 700; text-align: center; color: var(--text); }
