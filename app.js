@@ -690,14 +690,13 @@ async function loadProfilesList() {
 
 function quickSwitchProfile(uid, name, avatarEnc) {
   var avatar = decodeURIComponent(avatarEnc);
-  if (!confirm('Entrar como ' + name + '?')) return;
-  localStorage.setItem('rene_user', JSON.stringify({
-    uid:    uid,
-    name:   name,
-    email:  uid + '@local',
-    avatar: avatar
-  }));
-  location.reload();
+
+  // define o usuário selecionado
+  currentUser = { uid:uid, name:name, email:uid+'@local', avatar:avatar };
+  localStorage.setItem('rene_user', JSON.stringify(currentUser));
+
+  // entra na home e busca os dados do usuário no Sheets
+  afterLogin();
 }
 
 /* ── INIT ── */
