@@ -219,7 +219,7 @@ function renderHomeSavedWorkouts() {
   var catBg={a:'#e8f0fe',b:'#e6f4ea',c:'#f3e5f5',l:'#fff3e0'};
   grid.innerHTML = sw.map(function(w){
     var cat=w.category||'l',col=catColors[cat]||'var(--blue)',bg=catBg[cat]||'#e8f0fe',ico=CAT_EMOJI[cat]||'⭐';
-    return '<button class="menu-card" style="border-left:4px solid '+col+';background:'+bg+'" onclick="startSavedWorkout(\''+w.id+'\')">'
+    return '<button class="menu-card" style="border-left:4px solid '+col+';background:'+bg+'" onclick="startSavedWorkout('+w.id+')">'
       +'<div class="mc-icon" style="background:'+col+'"><span style="font-size:24px">'+ico+'</span></div>'
       +'<div class="mc-name">'+w.name+'</div>'
       +'<div class="mc-sub">'+(w.exercises||[]).length+' exercícios</div>'
