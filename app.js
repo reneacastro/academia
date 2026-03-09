@@ -138,6 +138,7 @@ function afterLogin() {
     renderHomeSavedWorkouts();
     initHome();
     loadFromSheets();
+    loadProfilesList(); // ← novo
   } catch(e) { console.error('afterLogin error:', e); showScreen('home'); }
 }
 
@@ -240,16 +241,20 @@ function initHome() {
     var g=h<12?'Bom dia':h<18?'Boa tarde':'Boa noite';
     var name=currentUser?(currentUser.name||currentUser.email.split('@')[0]):'Renê';
     setTxt('h-greeting', g+', '+name+'! 👋');
+
     var t=SCHEDULE[new Date().getDay()];
     ['a','b','c','l'].forEach(function(x){
       var el=document.getElementById('badge-'+x); if(el) el.style.display=(t===x)?'block':'none';
     });
+
+    // só mostra mensagem no sub se o treino do dia já foi feito
     var today=todayStr();
     var td=hist.find(function(i){ return parseDate(i.date)===today&&i.type!=='peso'; });
     var subEl=document.getElementById('h-sub');
-    if(td) subEl.textContent='Treino de hoje: '+td.name+' ✅';
-    else if(t==='rest') subEl.textContent='Dia de descanso hoje 😌';
-    else subEl.textContent='Sugerido hoje: '+(WN[t]||t);
+    if(td) subEl.textContent='Treino de hoje concluído ✅';
+    else if(t==='rest') subEl.textContent='Dia de descanso 😌';
+    else subEl.textContent=''; // sugestão já aparece nos badges abaixo
+
     renderHomeSavedWorkouts();
   } catch(e) { console.error('initHome',e); }
 }
@@ -686,30 +691,34 @@ function showFb(eid) {
 
 async function loadProfilesList() {
   if (!currentUser) return;
-  var card = document.getElementById('profiles-list-card');
-  if (!card) return;
   try {
     var res  = await fetch(API+'?action=listProfiles');
     var data = JSON.parse(await res.text());
     if (!Array.isArray(data) || !data.length) return;
-    var list = document.getElementById('profiles-list');
-    list.innerHTML = data.map(function(p) {
-      var nome = (p.name||'') + (p.surname?' '+p.surname:'');
-      return '<div class="profile-quick" onclick="quickSwitchProfile(\''+p.uid+'\',\''+nome+'\',\''+encodeURIComponent(p.avatar||'🏋️‍♂️')+'\')">'
-        +'<div class="pq-avatar">'+(p.avatar||'💪')+'</div>'
-        +'<div class="pq-name">'+nome+'</div>'
-        +'</div>';
-    }).join('');
-    card.style.display = 'block';
-  } catch(e) { console.warn('loadProfilesList falhou', e); }
-}
 
-function quickSwitchProfile(uid, name, avatarEnc) {
-  var avatar = decodeURIComponent(avatarEnc);
-  if (!confirm('Entrar como '+name+'?')) return;
-  currentUser = { uid:uid, name:name, email:uid+'@local', avatar:avatar };
-  localStorage.setItem('rene_user', JSON.stringify(currentUser));
-  location.reload();
+    var html = data
+      .filter(function(p){ return p.uid !== currentUser.uid; }) // oculta o próprio usuário
+      .map(function(p) {
+        var nome = (p.name||'') + (p.surname?' '+p.surname:'');
+        return '<div class="profile-quick" onclick="quickSwitchProfile(\''+p.uid+'\',\''+nome+'\',\''+encodeURIComponent(p.avatar||'🏋️‍♂️')+'\')">'
+          +'<div class="pq-avatar">'+(p.avatar||'💪')+'</div>'
+          +'<div class="pq-name">'+nome+'</div>'
+          +'</div>';
+      }).join('');
+
+    if (!html) return; // se só existe 1 perfil, não mostra o bloco
+
+    // tela de perfil
+    var card1 = document.getElementById('profiles-list-card');
+    var list1 = document.getElementById('profiles-list');
+    if (card1 && list1) { list1.innerHTML = html; card1.style.display = 'block'; }
+
+    // home
+    var card2 = document.getElementById('home-profiles-card');
+    var list2 = document.getElementById('home-profiles-list');
+    if (card2 && list2) { list2.innerHTML = html; card2.style.display = 'block'; }
+
+  } catch(e) { console.warn('loadProfilesList falhou', e); }
 }
 
 /* ── INIT ── */
