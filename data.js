@@ -1,7 +1,7 @@
 // ============================================================
 // Academia do Renê — data.js
 // ============================================================
-const API = 'https://script.google.com/macros/s/AKfycbwOCH-J3SHMpDGqrpB3mBMvGR-GkRpPCxLK8gAbpwiCsWEXBwebNgS7FNrjjhupPC2/exec';
+const API = 'https://script.google.com/macros/s/AKfycbz-Dt8HESvtIyCJfkMOJTEzb7lMc0cFfS7ui59Qtb2C_k-0pZ7iZawEgEBOXINjR5zY/exec';
 
 const BASE = 'https://raw.githubusercontent.com/reneacastro/academia/refs/heads/main/';
 
