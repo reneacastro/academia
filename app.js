@@ -88,6 +88,18 @@ function saveProfile() {
                   name:name+(surname?' '+surname:''), avatar:selectedAvatar };
   localStorage.setItem('rene_user', JSON.stringify(currentUser));
 
+  // ← NOVO: sincroniza perfil com o Sheets
+  apiPost({
+    action:   'saveProfile',
+    name:     name,
+    surname:  surname,
+    height:   height,
+    weight:   weight,
+    avatar:   selectedAvatar,
+    goals:    selectedGoals,
+    objetivo: selectedGoals.join(',')
+  });
+
   if (weight) {
     var today = todayStr();
     var wi = hist.findIndex(function(x){ return parseDate(x.date)===today && x.type==='peso'; });
@@ -150,18 +162,20 @@ async function loadFromSheets() {
   var t = setTimeout(function(){ setSyncStatus('err','Sem conexão — dados locais'); }, 10000);
   try {
     var uid = encodeURIComponent(currentUser.uid);
-    var [hRes, wRes, sRes] = await Promise.all([
+    var [hRes, wRes, sRes, pRes] = await Promise.all([
       fetch(API+'?action=getHistory&uid='+uid),
       fetch(API+'?action=getWorkouts&uid='+uid),
-      fetch(API+'?action=getSchedule&uid='+uid)
+      fetch(API+'?action=getSchedule&uid='+uid),
+      fetch(API+'?action=getProfile&uid='+uid)
     ]);
-    var hText=await hRes.text(), wText=await wRes.text(), sText=await sRes.text();
-    var hData=[], wData=[], sData=null;
-    try { hData=JSON.parse(hText); } catch(e){ console.warn('[Sheets] hData inválido:', hText.slice(0,300)); }
-    try { wData=JSON.parse(wText); } catch(e){ console.warn('[Sheets] wData inválido:', wText.slice(0,300)); }
-    try { sData=JSON.parse(sText); } catch(e){ console.warn('[Sheets] sData inválido:', sText.slice(0,300)); }
+    var hText=await hRes.text(), wText=await wRes.text(),
+        sText=await sRes.text(), pText=await pRes.text();
+    var hData=[], wData=[], sData=null, pData=null;
+    try { hData=JSON.parse(hText); } catch(e){ console.warn('[Sheets] hData inválido:',hText.slice(0,200)); }
+    try { wData=JSON.parse(wText); } catch(e){ console.warn('[Sheets] wData inválido:',wText.slice(0,200)); }
+    try { sData=JSON.parse(sText); } catch(e){ console.warn('[Sheets] sData inválido:',sText.slice(0,200)); }
+    try { pData=JSON.parse(pText); } catch(e){ console.warn('[Sheets] pData inválido:',pText.slice(0,200)); }
 
-    // só sobrescreve local se vier dados reais do servidor
     if (Array.isArray(hData) && hData.length) {
       hist=hData.map(function(r){return Object.assign({},r,{date:parseDate(r.date)||r.date});}).filter(function(r){return r.date;});
       cacheHist();
@@ -170,6 +184,26 @@ async function loadFromSheets() {
     if (sData && typeof sData==='object' && !Array.isArray(sData)) {
       SCHEDULE=sData; localStorage.setItem('reneschedule',JSON.stringify(sData));
     }
+
+    // ← NOVO: atualiza perfil local com dados do Sheets
+    if (pData && pData.uid) {
+      var localProfile = JSON.parse(localStorage.getItem('rene_profile')||'{}');
+      var merged = Object.assign({}, localProfile, {
+        name:    pData.name    || localProfile.name    || '',
+        surname: pData.surname || localProfile.surname || '',
+        height:  pData.height  || localProfile.height  || '',
+        weight:  pData.weight  || localProfile.weight  || null,
+        avatar:  pData.avatar  || localProfile.avatar  || '🏋️‍♂️',
+        goals:   pData.goals   || localProfile.goals   || []
+      });
+      localStorage.setItem('rene_profile', JSON.stringify(merged));
+      currentUser.avatar = merged.avatar;
+      currentUser.name   = merged.name + (merged.surname ? ' '+merged.surname : '');
+      localStorage.setItem('rene_user', JSON.stringify(currentUser));
+      var barUser = document.getElementById('bar-user');
+      if (barUser) barUser.textContent = (currentUser.avatar||'💪')+' '+currentUser.name;
+    }
+
     clearTimeout(t); setSyncStatus('ok','Sincronizado ✓');
     initDefaultWorkouts(); initHome(); renderSchedUI(); renderHomeSavedWorkouts();
     renderHist(); renderCalWorkouts();
@@ -177,7 +211,7 @@ async function loadFromSheets() {
     if (document.getElementById('s-bank').classList.contains('active')) renderSW();
   } catch(e) {
     clearTimeout(t);
-    console.error('[Sheets] loadFromSheets falhou:', e);
+    console.error('[Sheets] loadFromSheets falhou:',e);
     setSyncStatus('err','Offline — dados locais');
   }
 }
@@ -370,8 +404,15 @@ function saveCongrats() {
     hist[i].calories = cal;
     if (peso) hist[i].peso = peso;
     cacheHist();
-    apiPost({ action:'saveHistory', date:hist[i].date, type:hist[i].type,
-              name:hist[i].name, calories:cal, peso:peso });
+    apiPost({
+      action:   'saveHistory',
+      date:     hist[i].date,
+      type:     hist[i].type,
+      name:     hist[i].name,
+      calories: cal,
+      peso:     peso,
+      pesos:    hist[i].pesos || null   // ← cargas por exercício
+    });
   }
   if (peso) {
     var pi = hist.findIndex(function(x){ return parseDate(x.date)===today && x.type==='peso'; });
