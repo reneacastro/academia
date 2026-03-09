@@ -688,6 +688,18 @@ async function loadProfilesList() {
   } catch(e) { console.warn('loadProfilesList falhou', e); }
 }
 
+function quickSwitchProfile(uid, name, avatarEnc) {
+  var avatar = decodeURIComponent(avatarEnc);
+  if (!confirm('Entrar como ' + name + '?')) return;
+  localStorage.setItem('rene_user', JSON.stringify({
+    uid:    uid,
+    name:   name,
+    email:  uid + '@local',
+    avatar: avatar
+  }));
+  location.reload();
+}
+
 /* ── INIT ── */
 window.addEventListener('DOMContentLoaded', function(){
   try { checkStoredLogin(); } catch(e){ console.error('init error:',e); }
