@@ -147,24 +147,27 @@ async function apiPost(payload) {
 async function loadFromSheets() {
   if (!currentUser) return;
   setSyncStatus('syncing','Sincronizando...');
-  var t = setTimeout(function(){ setSyncStatus('err','Sem conexão — dados locais'); }, 8000);
+  var t = setTimeout(function(){ setSyncStatus('err','Sem conexão — dados locais'); }, 10000);
   try {
     var uid = encodeURIComponent(currentUser.uid);
-    var [hRes,wRes,sRes] = await Promise.all([
-      fetch(API+'?action=getHistory&uid='+uid,{redirect:'follow'}),
-      fetch(API+'?action=getWorkouts&uid='+uid,{redirect:'follow'}),
-      fetch(API+'?action=getSchedule&uid='+uid,{redirect:'follow'})
+    var [hRes, wRes, sRes] = await Promise.all([
+      fetch(API+'?action=getHistory&uid='+uid),
+      fetch(API+'?action=getWorkouts&uid='+uid),
+      fetch(API+'?action=getSchedule&uid='+uid)
     ]);
-    var hData=[],wData=[],sData=null;
-    try { hData=JSON.parse(await hRes.text()); } catch(_) {}
-    try { wData=JSON.parse(await wRes.text()); } catch(_) {}
-    try { sData=JSON.parse(await sRes.text()); } catch(_) {}
-    if (Array.isArray(hData)) {
+    var hText=await hRes.text(), wText=await wRes.text(), sText=await sRes.text();
+    var hData=[], wData=[], sData=null;
+    try { hData=JSON.parse(hText); } catch(e){ console.warn('[Sheets] hData inválido:', hText.slice(0,300)); }
+    try { wData=JSON.parse(wText); } catch(e){ console.warn('[Sheets] wData inválido:', wText.slice(0,300)); }
+    try { sData=JSON.parse(sText); } catch(e){ console.warn('[Sheets] sData inválido:', sText.slice(0,300)); }
+
+    // só sobrescreve local se vier dados reais do servidor
+    if (Array.isArray(hData) && hData.length) {
       hist=hData.map(function(r){return Object.assign({},r,{date:parseDate(r.date)||r.date});}).filter(function(r){return r.date;});
       cacheHist();
     }
-    if (Array.isArray(wData)&&wData.length) { sw=wData; cacheSW(); }
-    if (sData&&typeof sData==='object'&&!Array.isArray(sData)) {
+    if (Array.isArray(wData) && wData.length) { sw=wData; cacheSW(); }
+    if (sData && typeof sData==='object' && !Array.isArray(sData)) {
       SCHEDULE=sData; localStorage.setItem('reneschedule',JSON.stringify(sData));
     }
     clearTimeout(t); setSyncStatus('ok','Sincronizado ✓');
@@ -172,7 +175,11 @@ async function loadFromSheets() {
     renderHist(); renderCalWorkouts();
     if (document.getElementById('s-dashboard').classList.contains('active')) renderDash();
     if (document.getElementById('s-bank').classList.contains('active')) renderSW();
-  } catch(e) { clearTimeout(t); setSyncStatus('err','Offline — dados locais'); }
+  } catch(e) {
+    clearTimeout(t);
+    console.error('[Sheets] loadFromSheets falhou:', e);
+    setSyncStatus('err','Offline — dados locais');
+  }
 }
 
 /* ── SCREENS ── */
