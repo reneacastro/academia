@@ -309,13 +309,22 @@ async function saveSched() {
 
 /* ── TREINOS PADRÃO ── */
 function initDefaultWorkouts() {
-  if(sw.length) return;
-  sw=[
-    {id:1,name:'Treino A — Superior/Core',  category:'a',exercises:['a1','a2','a3','a4','a5','a6','a7','a8'],created:new Date().toLocaleDateString('pt-BR')},
-    {id:2,name:'Treino B — Inferior/Glúteos',category:'b',exercises:['b1','b2','b3','b4','b5','b6','b7'],  created:new Date().toLocaleDateString('pt-BR')},
-    {id:3,name:'Treino C — Full Body/Cardio', category:'c',exercises:['c1','c2','c3','c4','c5','c6','c7'], created:new Date().toLocaleDateString('pt-BR')}
+  var defaults = [
+    { id:'default_a', name:'Treino A — Superior', category:'a',
+      exercises:['a1','a2','a3','a4','a5','a6','a7','a8'], created:todayStr() },
+    { id:'default_b', name:'Treino B — Inferior',  category:'b',
+      exercises:['b1','b2','b3','b4','b5','b6','b7'],   created:todayStr() },
+    { id:'default_c', name:'Treino C — Full Body', category:'c',
+      exercises:['c1','c2','c3','c4','c5','c6','c7'],   created:todayStr() },
+    { id:'default_l', name:'Treino Livre',          category:'l',
+      exercises:['l1','l2','l3'],                       created:todayStr() }
   ];
-  cacheSW();
+  var existingIds = sw.map(function(w){ return String(w.id); });
+  var added = false;
+  defaults.forEach(function(d) {
+    if (existingIds.indexOf(d.id) < 0) { sw.push(d); added = true; }
+  });
+  if (added) cacheSW();
 }
 
 /* ── WORKOUT ── */
@@ -647,14 +656,22 @@ async function saveWorkout() {
   var dominantCat=Object.keys(catCount).sort(function(a,b){return catCount[b]-catCount[a];})[0]||'l';
   var w={id:Date.now(),name:name,category:dominantCat,exercises:exArr,created:new Date().toLocaleDateString('pt-BR')};
   sw.push(w); cacheSW();
-  await apiPost({action:'saveWorkout',...w});
+  await apiPost({action:'saveWorkout',id:w.id,name:w.name,category:w.category,exercises:w.exercises,created:w.created});
   selBank.clear();
   setVal('cw-inp','');
   setTxt('sel-count','0 selecionados');
-  document.querySelectorAll('.bank-btn').forEach(function(b){b.innerHTML='<span class="mi">add_circle_outline</span> Adicionar';b.style.background='';});
-  renderBank(); renderSW(); initHome();
-  switchBankTab('saved',document.querySelectorAll('.tab-btn')[4]);
+  document.querySelectorAll('.bank-btn').forEach(function(b){
+    b.innerHTML='<span class="mi">add_circle_outline</span> Adicionar'; b.style.background='';
+  });
+  // atualiza todos os painéis imediatamente
+  renderBank();
+  renderSW();
+  renderSchedUI();
+  renderHomeSavedWorkouts();
+  initHome();
+  switchBankTab('saved', document.querySelectorAll('.tab-btn')[4]);
 }
+
 function renderSW() {
   var list=document.getElementById('sw-list'); if(!list) return;
   if(!sw.length){list.innerHTML='<div class="empty"><span class="mi">folder_open</span>Nenhum treino personalizado salvo ainda.</div>';return;}
