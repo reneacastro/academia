@@ -357,15 +357,19 @@ function finishWorkout() {
 function saveCongrats() {
   var cal  = parseInt(document.getElementById('cg-cal').value)||0;
   var peso = parseFloat(document.getElementById('cg-peso').value)||null;
-  var today=todayStr();
-  var i=hist.findIndex(function(x){return parseDate(x.date)===today&&x.type!=='peso';});
-  if(i>=0){
-    hist[i].calories=cal; if(peso) hist[i].peso=peso; cacheHist();
-    apiPost({action:'saveHistory',date:hist[i].date,type:hist[i].type,name:hist[i].name,calories:cal,peso:peso});
+  var today = todayStr();
+  var i = hist.findIndex(function(x){ return parseDate(x.date)===today && x.type!=='peso'; });
+  if (i >= 0) {
+    hist[i].calories = cal;
+    if (peso) hist[i].peso = peso;
+    cacheHist();
+    apiPost({ action:'saveHistory', date:hist[i].date, type:hist[i].type,
+              name:hist[i].name, calories:cal, peso:peso });
   }
-  if(peso){
-    var pi=hist.findIndex(function(x){return parseDate(x.date)===today&&x.type==='peso';});
-    if(pi>=0) hist[pi].peso=peso; else hist.unshift({date:today,type:'peso',name:'Peso registrado',calories:0,peso:peso});
+  if (peso) {
+    var pi = hist.findIndex(function(x){ return parseDate(x.date)===today && x.type==='peso'; });
+    if (pi >= 0) hist[pi].peso = peso;
+    else hist.unshift({ date:today, type:'peso', name:'Peso registrado', calories:0, peso:peso });
     cacheHist();
   }
   showScreen('home'); initHome();
