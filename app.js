@@ -29,8 +29,6 @@ var sw   = JSON.parse(localStorage.getItem('rene_sw')   || '[]');
 function cacheHist() { localStorage.setItem('rene_hist', JSON.stringify(hist)); }
 function cacheSW()   { localStorage.setItem('rene_sw',   JSON.stringify(sw));   }
 
-const CAT_EMOJI = { a:'💪', b:'🦵', c:'🔥', l:'🏃' };
-
 /* ── PERFIL / AVATARES ── */
 var AVATARS = ['🏋️‍♂️','🤸‍♀️','💪','🧘‍♀️','🏃‍♂️','🏃‍♀️','🦾','🧗‍♀️','🥊','⚡'];
 var selectedAvatar = '🏋️‍♂️';
