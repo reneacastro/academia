@@ -1,13 +1,13 @@
 const CACHE = 'academia-v1';
 const FILES = [
-  './',
-  './index.html',
-  './app.js',
-  './data.js',
-  './styles.css',
-  './manifest.json',
-  './icons/icon-192.png',
-  './icons/icon-512.png'
+  '/academia/',
+  '/academia/index.html',
+  '/academia/app.js',
+  '/academia/data.js',
+  '/academia/styles.css',
+  '/academia/manifest.json',
+  '/academia/icons/icon-192.png',
+  '/academia/icons/icon-512.png'
 ];
 
 self.addEventListener('install', e => {
