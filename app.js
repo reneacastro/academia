@@ -125,6 +125,24 @@ function checkStoredLogin() {
 }
 function logout() { localStorage.clear(); location.reload(); }
 
+function afterLogin() {
+  try {
+    var el = document.getElementById('bar-user');
+    if (el) {
+      el.textContent = (currentUser.avatar||'💪')+' '+(currentUser.name||currentUser.email.split('@')[0]);
+      el.style.display = 'block';
+    }
+    var lo = document.getElementById('btn-logout');
+    if (lo) lo.style.display = 'flex';
+    initDefaultWorkouts();
+    showScreen('home');
+    renderSchedUI();
+    renderHomeSavedWorkouts();
+    initHome();
+    loadFromSheets();
+  } catch(e) { console.error('afterLogin error:', e); showScreen('home'); }
+}
+
 /* ── SYNC ── */
 function setSyncStatus(state, msg) {
   var dot=document.getElementById('sync-dot'), txt=document.getElementById('sync-txt');
