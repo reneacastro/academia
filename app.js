@@ -36,7 +36,7 @@ var selectedGoals  = [];
 
 function initProfile() {
   var raw = localStorage.getItem('rene_profile');
-  if (!raw) { renderAvatarPicker(); return; }
+  if (!raw) { renderAvatarPicker(); loadProfilesList(); return; }
   var p = JSON.parse(raw);
   setVal('pf-name',    p.name    || '');
   setVal('pf-surname', p.surname || '');
@@ -46,6 +46,7 @@ function initProfile() {
   selectedGoals  = p.goals  || [];
   renderAvatarPicker();
   renderGoalOpts();
+  loadProfilesList();
 }
 
 function renderAvatarPicker() {
@@ -292,13 +293,21 @@ function updSchedColor(sel) {
   var v=sel.value, col=cCol[v]||'var(--blue)', bg=cBg[v]||'#e8f0fe';
   sel.style.background=bg; sel.style.color=col; sel.style.borderColor=col;
 }
-function saveSched() {
-  document.querySelectorAll('.sched-sel').forEach(function(s){ SCHEDULE[parseInt(s.dataset.day)]=s.value; });
-  localStorage.setItem('reneschedule',JSON.stringify(SCHEDULE));
-  apiPost({action:'saveSchedule',schedule:SCHEDULE});
+async function saveSched() {
+  var newSched = {};
+  document.querySelectorAll('.sched-sel').forEach(function(s){
+    newSched[parseInt(s.dataset.day)] = s.value;
+  });
+  SCHEDULE = newSched;
+  localStorage.setItem('reneschedule', JSON.stringify(SCHEDULE));
+  var btn = document.getElementById('sched-save-btn');
+  try {
+    await apiPost({ action:'saveSchedule', schedule:SCHEDULE });
+    if(btn){ btn.textContent='✓ Salvo!'; setTimeout(function(){ btn.innerHTML='<span class="mi">save</span> Salvar Grade'; },2000); }
+  } catch(e) {
+    if(btn){ btn.textContent='Salvo localmente'; setTimeout(function(){ btn.innerHTML='<span class="mi">save</span> Salvar Grade'; },2000); }
+  }
   initHome();
-  var btn=document.getElementById('sched-save-btn');
-  if(btn){btn.textContent='✓ Salvo!'; setTimeout(function(){btn.textContent='Salvar Grade';},2000);}
 }
 
 /* ── TREINOS PADRÃO ── */
@@ -673,6 +682,34 @@ function showFb(eid) {
   var fb=document.getElementById('fb-'+eid), im=document.getElementById('img-'+eid);
   if(fb) fb.style.display='flex';
   if(im) im.style.display='none';
+}
+
+async function loadProfilesList() {
+  if (!currentUser) return;
+  var card = document.getElementById('profiles-list-card');
+  if (!card) return;
+  try {
+    var res  = await fetch(API+'?action=listProfiles');
+    var data = JSON.parse(await res.text());
+    if (!Array.isArray(data) || !data.length) return;
+    var list = document.getElementById('profiles-list');
+    list.innerHTML = data.map(function(p) {
+      var nome = (p.name||'') + (p.surname?' '+p.surname:'');
+      return '<div class="profile-quick" onclick="quickSwitchProfile(\''+p.uid+'\',\''+nome+'\',\''+encodeURIComponent(p.avatar||'🏋️‍♂️')+'\')">'
+        +'<div class="pq-avatar">'+(p.avatar||'💪')+'</div>'
+        +'<div class="pq-name">'+nome+'</div>'
+        +'</div>';
+    }).join('');
+    card.style.display = 'block';
+  } catch(e) { console.warn('loadProfilesList falhou', e); }
+}
+
+function quickSwitchProfile(uid, name, avatarEnc) {
+  var avatar = decodeURIComponent(avatarEnc);
+  if (!confirm('Entrar como '+name+'?')) return;
+  currentUser = { uid:uid, name:name, email:uid+'@local', avatar:avatar };
+  localStorage.setItem('rene_user', JSON.stringify(currentUser));
+  location.reload();
 }
 
 /* ── INIT ── */
