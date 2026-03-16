@@ -176,11 +176,13 @@ async function loadFromSheets() {
     try { pData=JSON.parse(pText); } catch(e){}
     try { bDataR=JSON.parse(bText); } catch(e){}
 
-    if (Array.isArray(hData) && hData.length) {
+    // Sempre substitui pelo que o Sheets mandar — inclusive array vazio
+    // (permite que exclusões na planilha se reflitam no app)
+    if (Array.isArray(hData)) {
       hist=hData.map(function(r){return Object.assign({},r,{date:parseDate(r.date)||r.date});}).filter(function(r){return r.date;});
       cacheHist();
     }
-    if (Array.isArray(wData) && wData.length) { sw=wData; cacheSW(); }
+    if (Array.isArray(wData)) { sw=wData; cacheSW(); }
     if (sData && typeof sData==='object' && !Array.isArray(sData)) {
       SCHEDULE=sData; localStorage.setItem('reneschedule',JSON.stringify(sData));
     }
@@ -198,7 +200,7 @@ async function loadFromSheets() {
       var barUser = document.getElementById('bar-user');
       if (barUser) barUser.textContent=(currentUser.avatar||'💪')+' '+currentUser.name;
     }
-    if (Array.isArray(bDataR) && bDataR.length) { bodyData=bDataR; cacheBody(); }
+    if (Array.isArray(bDataR)) { bodyData=bDataR; cacheBody(); }
 
     clearTimeout(t); setSyncStatus('ok','Sincronizado ✓');
     initDefaultWorkouts(); initHome(); renderSchedUI(); renderHomeSavedWorkouts();
