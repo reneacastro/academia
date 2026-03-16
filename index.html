@@ -6,7 +6,7 @@
 <title>Academia do Renê</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <link rel="stylesheet" href="styles.css"/>
@@ -98,7 +98,7 @@
       </div>
     </div>
     <div class="card">
-      <div class="card-title"><span class="mi">flag</span> Objetivo Principal <span style="font-size:11px;color:var(--sub);font-weight:400;margin-left:4px">(múltiplo)</span></div>
+      <div class="card-title"><span class="mi">flag</span> Objetivo Principal <span style="font-size:11px;color:var(--sub);font-weight:500;margin-left:4px">(múltiplo)</span></div>
       <div class="goal-grid">
         <div class="goal-opt" data-goal="emagrecer" onclick="toggleGoal('emagrecer')">
           <span class="goal-icon">🔥</span>Emagrecimento
@@ -128,11 +128,10 @@
     <span id="sync-txt">Aguardando sincronização...</span>
   </div>
 
-  <!-- Welcome Hero -->
   <div class="welcome-hero">
     <div class="welcome-top">
       <div class="welcome-avatar" id="home-avatar">🏋️‍♂️</div>
-      <div>
+      <div class="welcome-text">
         <div class="welcome-greeting" id="h-greeting-sub">Bom dia</div>
         <div class="welcome-name" id="h-greeting">Bem-vindo! 👋</div>
       </div>
@@ -155,7 +154,7 @@
 
   <div style="margin-bottom:8px">
     <span id="badge-a" class="day-badge" style="display:none;background:#e8f0fe;color:var(--blue)">💪 Hoje: Superior</span>
-    <span id="badge-b" class="day-badge" style="display:none;background:#e6f4ea;color:var(--green)">🦵 Hoje: Inferior</span>
+    <span id="badge-b" class="day-badge" style="display:none;background:#e0f7ec;color:var(--green)">🦵 Hoje: Inferior</span>
     <span id="badge-c" class="day-badge" style="display:none;background:#f3e5f5;color:var(--purple)">🔥 Hoje: Full Body</span>
     <span id="badge-l" class="day-badge" style="display:none;background:#fff3e0;color:var(--orange)">🏃 Hoje: Treino Livre</span>
   </div>
@@ -211,9 +210,8 @@
     <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
     <div id="prog-txt">0 / 0 exercícios concluídos</div>
   </div>
-  <!-- Cardio box — visível apenas em treino livre -->
   <div class="cardio-box" id="cardio-box" style="display:none">
-    <div class="cardio-box-title"><span class="mi">directions_run</span> Dados do Cardio (opcional)</div>
+    <div class="cardio-box-title">🏃 Dados do Cardio (opcional)</div>
     <div class="cardio-inp-row">
       <div class="cardio-inp-group">
         <label>Distância (km)</label>
@@ -221,7 +219,7 @@
         <div class="cardio-inp-lbl">km percorridos</div>
       </div>
       <div class="cardio-inp-group">
-        <label>Ritmo médio (pace)</label>
+        <label>Pace médio</label>
         <input type="text" id="wk-pace" placeholder="05:30"/>
         <div class="cardio-inp-lbl">min/km</div>
       </div>
@@ -238,7 +236,6 @@
     <div class="congrats-emoji">🎉</div>
     <div class="congrats-title">Treino Concluído!</div>
     <div class="congrats-sub">Parabéns pelo esforço! Continue assim! 🚀</div>
-
     <div class="cg-box">
       <h3><span class="mi" style="color:var(--orange)">monitor_weight</span> Dados do treino</h3>
       <div class="cg-inp-row">
@@ -251,9 +248,8 @@
           <input type="number" id="cg-peso" placeholder="0" min="30" step="0.1"/>
         </div>
       </div>
-      <!-- Cardio campos — visíveis só em treino livre -->
       <div class="cg-cardio-sep" id="cg-cardio-sep" style="display:none">
-        <div class="cg-cardio-title"><span class="mi" style="font-size:14px">directions_run</span> Cardio</div>
+        <div class="cg-cardio-title">🏃 Cardio</div>
         <div class="cg-inp-row">
           <div class="cg-inp-group">
             <label>📍 Distância (km)</label>
@@ -267,7 +263,6 @@
       </div>
       <div class="cg-hint">Campos opcionais — preencha o que tiver disponível</div>
     </div>
-
     <div class="cg-btns">
       <button class="primary-btn success-btn" onclick="saveCongrats()">
         <span class="mi">check_circle</span> Salvar e voltar ao início
@@ -304,7 +299,6 @@
         <input type="number" id="cal-peso" placeholder="0" min="30" step="0.1"/>
       </div>
     </div>
-    <!-- Campos de cardio — aparecem quando treino livre é selecionado -->
     <div class="cal-cardio-row" id="cal-cardio-row">
       <div class="cal-inp-group">
         <label>📍 Distância (km)</label>
@@ -319,7 +313,6 @@
       <span class="mi">save</span> Salvar Registro
     </button>
   </div>
-
   <div class="cal-card">
     <h3><span class="mi" style="color:var(--blue)">history</span> Histórico de Treinos</h3>
     <div class="hist-list" id="cal-hist">
@@ -376,11 +369,11 @@
 <div class="container">
   <div class="sec-divider">Banco de Exercícios</div>
   <div class="tabs">
-    <button class="tab-btn on"  onclick="switchBankTab('a',this)">💪 Superior</button>
-    <button class="tab-btn"     onclick="switchBankTab('b',this)">🦵 Inferior</button>
-    <button class="tab-btn"     onclick="switchBankTab('c',this)">🔥 Full Body</button>
-    <button class="tab-btn"     onclick="switchBankTab('l',this)">🏃 Livre</button>
-    <button class="tab-btn"     onclick="switchBankTab('saved',this)">📁 Meus Treinos</button>
+    <button class="tab-btn on" onclick="switchBankTab('a',this)">💪 Superior</button>
+    <button class="tab-btn"    onclick="switchBankTab('b',this)">🦵 Inferior</button>
+    <button class="tab-btn"    onclick="switchBankTab('c',this)">🔥 Full Body</button>
+    <button class="tab-btn"    onclick="switchBankTab('l',this)">🏃 Livre</button>
+    <button class="tab-btn"    onclick="switchBankTab('saved',this)">📁 Meus Treinos</button>
   </div>
   <div class="tab-panel on" id="bp-a"></div>
   <div class="tab-panel"    id="bp-b"></div>
@@ -393,7 +386,7 @@
   </div>
   <div class="card" style="margin-top:16px">
     <div class="card-title"><span class="mi">save</span> Salvar Treino Selecionado</div>
-    <div id="sel-count" style="margin-bottom:8px;font-size:13px;color:var(--blue);font-weight:700">0 selecionados</div>
+    <div id="sel-count" style="margin-bottom:8px">0 selecionados</div>
     <input type="text" class="cw-name-inp" id="cw-inp" placeholder="Nome do treino (ex: Treino Pesado A)"/>
     <button class="primary-btn" onclick="saveWorkout()">
       <span class="mi">save</span> Salvar Treino
@@ -414,7 +407,6 @@
     </div>
   </div>
 
-  <!-- Formulário de registro -->
   <div class="card">
     <div class="card-title"><span class="mi">add_circle</span> Novo Registro</div>
 
@@ -423,7 +415,7 @@
       <input type="date" id="bc-date" class="cal-inp" style="margin-bottom:0"/>
     </div>
 
-    <div class="body-section-title"><span class="mi">scale</span> Dados Básicos</div>
+    <div class="body-section-title">Dados Básicos</div>
     <div class="body-grid">
       <div class="body-inp-group">
         <label>Peso (kg)</label>
@@ -431,12 +423,12 @@
       </div>
       <div class="body-inp-group">
         <label>IMC calculado</label>
-        <input type="text" id="bc-imc" placeholder="—" readonly style="background:var(--bg2);color:var(--sub)"/>
+        <input type="text" id="bc-imc" placeholder="—" readonly/>
       </div>
     </div>
     <div id="bc-imc-badge"></div>
 
-    <div class="body-section-title"><span class="mi">monitor_heart</span> Bioimpedância</div>
+    <div class="body-section-title">Bioimpedância</div>
     <div class="body-grid">
       <div class="body-inp-group">
         <label>% Gordura Corporal</label>
@@ -464,7 +456,7 @@
       </div>
     </div>
 
-    <div class="body-section-title"><span class="mi">straighten</span> Medidas (cm)</div>
+    <div class="body-section-title">Medidas (cm)</div>
     <div class="body-grid three">
       <div class="body-inp-group">
         <label>Cintura</label>
@@ -504,12 +496,11 @@
       </div>
     </div>
 
-    <button class="primary-btn success-btn" onclick="saveBodyComp()" style="margin-top:6px">
+    <button class="primary-btn success-btn" onclick="saveBodyComp()" style="margin-top:8px">
       <span class="mi">save</span> Salvar Avaliação
     </button>
   </div>
 
-  <!-- Gráficos corporais -->
   <div class="chart-wrap">
     <div class="chart-title">🔥 % Gordura Corporal</div>
     <div class="chart-box"><canvas id="ch-fat"></canvas></div>
@@ -526,7 +517,6 @@
     <div class="chart-empty" id="measures-chart-empty">Nenhum dado registrado ainda.</div>
   </div>
 
-  <!-- Histórico -->
   <div class="card">
     <div class="card-title"><span class="mi">history</span> Histórico de Avaliações</div>
     <div class="body-hist" id="body-hist">
